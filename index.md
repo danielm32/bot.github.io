@@ -1,37 +1,52 @@
-## Welcome to GitHub Pages
-
-You can use the [editor on GitHub](https://github.com/danielm32/bot.php/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/danielm32/bot.php/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+<?php
+$access_token="EAADRoj3y75gBALVNO7Gkkn5SeAgMoKjhXZBdiJZB4X5EhdN4v4NuLmssfSeJ1EhOPxsSYhH8hngHMci3leUtz9asdA76ZAZAjg9aT9DJ2VMnIKy3Nq4ZAZBhwjdKi2L6yfTRP0NrCtlfZAMXUKFAC2bJNZB1cWgw9MPqP14omQ7nTFe1lhSQSTuj";
+$verify_token="hello_shoaib7737";
+$hub_verify_token=null;
+if(isset($_REQUEST['hub_mode'])&&$_REQUEST['hub_mode']=='subscribe')
+{
+	$challenge=$_REQUEST['hub_challenge'];
+	$hub_verify_token=$_REQUEST['hub_verify_token'];
+	if($hub_verify_token==$verify_token)
+		header('HTTP/1.1 200 OK');
+		echo $challenge;
+		die;
+}
+$input=json_decode(file_get_contents('php://input'),true);
+$sender=$input['entry'][0]['messaging'][0]['sender']['id'];
+$message=isset($input['entry'][0]['messaging'][0]['message']['text'])?$input['entry'][0]['messaging'][0]['message']['text']:'';
+if($message)
+{
+	$words = explode(" ", $message);
+	if($words[0]=="Hi"||$words[0]=="Hello"||$words[0]=="hi"||$words[0]=="hello")
+	{
+		$message_to_reply="hi there :)"."How can I help You??";
+	}
+	else if($words[0]=="What"||$words[0]=="Why"||$words[0]=="Who"||$words[0]=="who"||$words[0]=="what"||$words[0]=="why")
+	{
+		$message_to_reply="I am just a normal bot to answer the questions on behalf of my creator mr.Shoaib :)";
+	}
+	else
+	{
+		$message_to_reply="I am Sorry, I can't help You This Time.";
+	}
+	$url="https://graph.facebook.com/v2.6/me/messages?access_token=".$access_token;
+	$jsonData='{
+					"recipient":{
+						"id":"'.$sender.'"
+					},
+					"message":{
+						"text":"'.$message_to_reply.'"
+					}
+				 
+				}';
+	$ch=curl_init($url);
+	curl_setopt($ch,CURLOPT_POST,1);
+	curl_setopt($ch,CURLOPT_POSTFIELDS,$jsonData);
+	curl_setopt($ch,CURLOPT_HTTPHEADER,array('Content-Type:application/json'));
+	curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,false);
+	curl_setopt($ch,CURLOPT_HTTP_VERSION,CURLOPT_HTTP_VERSION_NONE);
+	$result=curl_exec($ch);
+	curl_close($ch);
+	
+}	
+?>
